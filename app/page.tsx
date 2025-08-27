@@ -36,6 +36,7 @@ export default function NFTuklasApp() {
   const [showCoinAnimation, setShowCoinAnimation] = useState(false)
   const [totalProspects, setTotalProspects] = useState(0)
   const [streak, setStreak] = useState(0)
+  const [livesTimer, setLivesTimer] = useState<number | null>(null)
 
   useEffect(() => {
     const savedCoins = localStorage.getItem("nftuklas-coins")
@@ -55,6 +56,27 @@ export default function NFTuklasApp() {
     localStorage.setItem("nftuklas-streak", streak.toString())
   }, [coins, lives, totalProspects, streak])
 
+  useEffect(() => {
+    if (lives < 5 && lives >= 0) {
+      const timer = setTimeout(() => {
+        setLives((prev) => Math.min(5, prev + 1))
+      }, 30000) // Regenerate 1 life every 30 seconds for demo
+      setLivesTimer(timer)
+      return () => clearTimeout(timer)
+    } else {
+      setLivesTimer(null)
+    }
+  }, [lives])
+
+  useEffect(() => {
+    if (livesTimer && lives < 5) {
+      const interval = setInterval(() => {
+        // Force re-render to update timer display
+      }, 1000)
+      return () => clearInterval(interval)
+    }
+  }, [livesTimer, lives])
+
   const connectWallet = () => {
     setIsConnected(true)
   }
@@ -65,7 +87,13 @@ export default function NFTuklasApp() {
     setTotalProspects(0)
     setStreak(0)
     setLastResult(null)
+    if (livesTimer) clearTimeout(livesTimer)
+    setLivesTimer(null)
     localStorage.clear()
+  }
+
+  const buyLives = (amount: number) => {
+    setLives((prev) => Math.min(5, prev + amount))
   }
 
   const rollLoot = (): LootResult => {
@@ -293,6 +321,7 @@ export default function NFTuklasApp() {
                         transition={{ duration: 0.5 }}
                       />
                     </div>
+                    {lives < 5 && <p className="text-xs text-muted-foreground mt-1">+1 life in 30s</p>}
                   </CardContent>
                 </Card>
               </motion.div>
@@ -335,13 +364,12 @@ export default function NFTuklasApp() {
                   </motion.div>
 
                   {lives <= 0 && (
-                    <motion.p
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      className="text-destructive text-sm font-medium"
-                    >
-                      No lives remaining! Visit the shop to buy more.
-                    </motion.p>
+                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2">
+                      <p className="text-destructive text-sm font-medium">No lives remaining!</p>
+                      <Button onClick={() => buyLives(1)} variant="outline" size="sm" className="text-xs">
+                        Get 1 Life (Demo)
+                      </Button>
+                    </motion.div>
                   )}
                 </CardContent>
               </Card>
@@ -435,11 +463,11 @@ export default function NFTuklasApp() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button disabled className="w-full bg-transparent" variant="outline">
-                    Buy 5 Lives - 0.001 ETH
+                  <Button onClick={() => buyLives(5)} className="w-full" variant="outline" disabled={lives >= 5}>
+                    Buy 5 Lives - 0.001 ETH {lives >= 5 && "(Full)"}
                   </Button>
-                  <Button disabled className="w-full bg-transparent" variant="outline">
-                    Buy Unlimited Life - 0.01 ETH
+                  <Button onClick={() => setLives(999)} className="w-full" variant="outline">
+                    Buy Unlimited Lives - 0.01 ETH (Demo)
                   </Button>
                   <Button disabled className="w-full bg-transparent" variant="outline">
                     Lucky Charm (+10% Rare) - 0.005 ETH
