@@ -1,77 +1,79 @@
-@import 'tailwindcss';
-@import 'tw-animate-css';
+@import "tailwindcss";
+@import "tw-animate-css";
 
 @custom-variant dark (&:is(.dark *));
 
 :root {
-  --background: oklch(1 0 0);
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  --primary: oklch(0.205 0 0);
-  --primary-foreground: oklch(0.985 0 0);
-  --secondary: oklch(0.97 0 0);
-  --secondary-foreground: oklch(0.205 0 0);
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --destructive-foreground: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: oklch(0.708 0 0);
-  --chart-1: oklch(0.646 0.222 41.116);
-  --chart-2: oklch(0.6 0.118 184.704);
-  --chart-3: oklch(0.398 0.07 227.392);
-  --chart-4: oklch(0.828 0.189 84.429);
-  --chart-5: oklch(0.769 0.188 70.08);
-  --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
-  --sidebar-primary: oklch(0.205 0 0);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.97 0 0);
-  --sidebar-accent-foreground: oklch(0.205 0 0);
-  --sidebar-border: oklch(0.922 0 0);
-  --sidebar-ring: oklch(0.708 0 0);
+  /* Updated color tokens to match space-themed design brief */
+  --background: oklch(0.97 0.01 210); /* Soft space background */
+  --foreground: oklch(0.98 0 0); /* Clean white foreground */
+  --card: oklch(0.98 0 0); /* White cards for loot boxes */
+  --card-foreground: oklch(0.35 0.02 240); /* Dark text within cards */
+  --popover: oklch(0.98 0 0); /* White popups */
+  --popover-foreground: oklch(0.35 0.02 240); /* Dark text in popups */
+  --primary: oklch(0.55 0.15 160); /* Emerald primary for space energy */
+  --primary-foreground: oklch(0.98 0 0); /* White text on primary */
+  --secondary: oklch(0.65 0.12 160); /* Lighter emerald secondary */
+  --secondary-foreground: oklch(0.98 0 0); /* White text on secondary */
+  --muted: oklch(0.95 0.01 210); /* Muted space background */
+  --muted-foreground: oklch(0.45 0.02 240); /* Muted text */
+  --accent: oklch(0.65 0.12 160); /* Emerald accent for interactions */
+  --accent-foreground: oklch(0.98 0 0); /* White text on accent */
+  --destructive: oklch(0.55 0.22 25); /* Orange for destructive actions */
+  --destructive-foreground: oklch(0.98 0 0); /* White text on destructive */
+  --border: oklch(0.45 0.02 240); /* Dark borders */
+  --input: oklch(0.98 0 0); /* White input fields */
+  --ring: oklch(0.55 0.15 160 / 0.5); /* Emerald focus ring */
+  --chart-1: oklch(0.55 0.15 160); /* Primary chart color */
+  --chart-2: oklch(0.65 0.12 160); /* Secondary chart color */
+  --chart-3: oklch(0.55 0.22 25); /* Tertiary chart color */
+  --chart-4: oklch(0.45 0.02 240); /* Quaternary chart color */
+  --chart-5: oklch(0.98 0 0); /* Quinary chart color */
+  --radius: 0.5rem; /* Rounded corners */
+  --sidebar: oklch(0.98 0 0); /* White sidebar */
+  --sidebar-foreground: oklch(0.35 0.02 240); /* Dark sidebar text */
+  --sidebar-primary: oklch(0.55 0.15 160); /* Primary sidebar color */
+  --sidebar-primary-foreground: oklch(0.98 0 0); /* White sidebar primary text */
+  --sidebar-accent: oklch(0.65 0.12 160); /* Accent sidebar color */
+  --sidebar-accent-foreground: oklch(0.98 0 0); /* White sidebar accent text */
+  --sidebar-border: oklch(0.45 0.02 240); /* Dark sidebar borders */
+  --sidebar-ring: oklch(0.55 0.15 160 / 0.5); /* Emerald sidebar focus ring */
 }
 
 .dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.145 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.145 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: oklch(0.985 0 0);
-  --primary-foreground: oklch(0.205 0 0);
-  --secondary: oklch(0.269 0 0);
-  --secondary-foreground: oklch(0.985 0 0);
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.396 0.141 25.723);
-  --destructive-foreground: oklch(0.637 0.237 25.331);
-  --border: oklch(0.269 0 0);
-  --input: oklch(0.269 0 0);
-  --ring: oklch(0.439 0 0);
-  --chart-1: oklch(0.488 0.243 264.376);
-  --chart-2: oklch(0.696 0.17 162.48);
-  --chart-3: oklch(0.769 0.188 70.08);
-  --chart-4: oklch(0.627 0.265 303.9);
-  --chart-5: oklch(0.645 0.246 16.439);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: oklch(0.488 0.243 264.376);
-  --sidebar-primary-foreground: oklch(0.985 0 0);
-  --sidebar-accent: oklch(0.269 0 0);
-  --sidebar-accent-foreground: oklch(0.985 0 0);
-  --sidebar-border: oklch(0.269 0 0);
-  --sidebar-ring: oklch(0.439 0 0);
+  /* Enhanced dark mode for space theme */
+  --background: oklch(0.08 0.02 240); /* Deep space background */
+  --foreground: oklch(0.95 0.01 160); /* Light emerald foreground */
+  --card: oklch(0.12 0.02 240); /* Dark space cards */
+  --card-foreground: oklch(0.95 0.01 160); /* Light text in cards */
+  --popover: oklch(0.12 0.02 240); /* Dark popups */
+  --popover-foreground: oklch(0.95 0.01 160); /* Light popup text */
+  --primary: oklch(0.65 0.15 160); /* Bright emerald primary */
+  --primary-foreground: oklch(0.08 0.02 240); /* Dark text on primary */
+  --secondary: oklch(0.25 0.02 240); /* Dark secondary */
+  --secondary-foreground: oklch(0.95 0.01 160); /* Light secondary text */
+  --muted: oklch(0.15 0.02 240); /* Muted dark elements */
+  --muted-foreground: oklch(0.65 0.01 160); /* Muted light text */
+  --accent: oklch(0.65 0.15 160); /* Bright emerald accent */
+  --accent-foreground: oklch(0.08 0.02 240); /* Dark accent text */
+  --destructive: oklch(0.45 0.18 25); /* Darker orange destructive */
+  --destructive-foreground: oklch(0.95 0.01 160); /* Light destructive text */
+  --border: oklch(0.25 0.02 240); /* Dark borders */
+  --input: oklch(0.15 0.02 240); /* Dark inputs */
+  --ring: oklch(0.65 0.15 160 / 0.5); /* Bright emerald focus ring */
+  --chart-1: oklch(0.65 0.15 160); /* Bright primary chart */
+  --chart-2: oklch(0.75 0.12 180); /* Cyan chart color */
+  --chart-3: oklch(0.65 0.18 25); /* Orange chart color */
+  --chart-4: oklch(0.55 0.15 280); /* Purple chart color */
+  --chart-5: oklch(0.75 0.12 60); /* Yellow chart color */
+  --sidebar: oklch(0.1 0.02 240); /* Dark sidebar */
+  --sidebar-foreground: oklch(0.95 0.01 160); /* Light sidebar text */
+  --sidebar-primary: oklch(0.65 0.15 160); /* Bright sidebar primary */
+  --sidebar-primary-foreground: oklch(0.08 0.02 240); /* Dark sidebar primary text */
+  --sidebar-accent: oklch(0.25 0.02 240); /* Dark sidebar accent */
+  --sidebar-accent-foreground: oklch(0.95 0.01 160); /* Light sidebar accent text */
+  --sidebar-border: oklch(0.25 0.02 240); /* Dark sidebar borders */
+  --sidebar-ring: oklch(0.65 0.15 160 / 0.5); /* Bright sidebar focus ring */
 }
 
 @theme inline {
@@ -122,4 +124,73 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+/* Added custom animations for enhanced UI feedback */
+@keyframes coin-collect {
+  0% {
+    transform: scale(1) rotate(0deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.2) rotate(180deg);
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1) rotate(360deg);
+    opacity: 1;
+  }
+}
+
+@keyframes prospect-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+    box-shadow: 0 0 0 0 rgba(101, 163, 13, 0.7);
+  }
+  50% {
+    transform: scale(1.05);
+    box-shadow: 0 0 0 10px rgba(101, 163, 13, 0);
+  }
+}
+
+@keyframes loot-reveal {
+  0% {
+    transform: scale(0.8) rotateY(0deg);
+    opacity: 0;
+  }
+  50% {
+    transform: scale(1.1) rotateY(180deg);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(1) rotateY(360deg);
+    opacity: 1;
+  }
+}
+
+@keyframes floating {
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.coin-collect {
+  animation: coin-collect 0.6s ease-in-out;
+}
+
+.prospect-pulse {
+  animation: prospect-pulse 2s infinite;
+}
+
+.loot-reveal {
+  animation: loot-reveal 0.8s ease-out;
+}
+
+.floating {
+  animation: floating 3s ease-in-out infinite;
 }
