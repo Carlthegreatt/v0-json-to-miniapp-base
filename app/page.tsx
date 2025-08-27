@@ -5,7 +5,23 @@ import { motion, AnimatePresence } from "framer-motion"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
-import { Coins, Heart, ShoppingCart, Wallet, Sparkles, Bomb, Trophy, Star, Zap, Gift, RotateCcw } from "lucide-react"
+import {
+  Coins,
+  Heart,
+  ShoppingCart,
+  Wallet,
+  Sparkles,
+  Bomb,
+  Trophy,
+  Star,
+  Zap,
+  Gift,
+  RotateCcw,
+  Save as Sieve,
+  Crown,
+  Diamond,
+  Gem,
+} from "lucide-react"
 
 interface LootResult {
   tier: string
@@ -13,18 +29,106 @@ interface LootResult {
   coins: number
   isNFT?: boolean
   isBomb?: boolean
+  nftName?: string
+  rarity?: string
 }
 
 const LOOT_TABLE = [
-  { chance: 0.15, tier: "Dud", reward: "Nothing", coins: 0 },
-  { chance: 0.65, tier: "Common", reward: "1-3 Coins", coins: Math.floor(Math.random() * 3) + 1 },
-  { chance: 0.15, tier: "Uncommon", reward: "5-8 Coins", coins: Math.floor(Math.random() * 4) + 5 },
-  { chance: 0.03, tier: "Rare", reward: "15-25 Coins", coins: Math.floor(Math.random() * 11) + 15 },
-  { chance: 0.015, tier: "Bomb", reward: "-1 Life", coins: 0, isBomb: true },
-  { chance: 0.004, tier: "Epic", reward: "50-100 Coins", coins: Math.floor(Math.random() * 51) + 50 },
-  { chance: 0.0009, tier: "Legendary", reward: "Rare NFT", coins: 0, isNFT: true },
-  { chance: 0.0001, tier: "Mythic", reward: "Ultra Rare NFT + 500 Coins", coins: 500, isNFT: true },
+  { chance: 0.08, tier: "Dud", reward: "Nothing", coins: 0 },
+  { chance: 0.45, tier: "Common", reward: "1-5 Coins", coins: Math.floor(Math.random() * 5) + 1 },
+  { chance: 0.25, tier: "Uncommon", reward: "8-15 Coins", coins: Math.floor(Math.random() * 8) + 8 },
+  { chance: 0.12, tier: "Rare", reward: "20-35 Coins", coins: Math.floor(Math.random() * 16) + 20 },
+  { chance: 0.05, tier: "Bomb", reward: "BOOM! All coins lost!", coins: 0, isBomb: true },
+  { chance: 0.03, tier: "Epic", reward: "50-100 Coins", coins: Math.floor(Math.random() * 51) + 50 },
+  { chance: 0.015, tier: "Legendary", reward: "Rare NFT", coins: 0, isNFT: true, rarity: "Legendary" },
+  { chance: 0.004, tier: "Mythic", reward: "Ultra Rare NFT + 200 Coins", coins: 200, isNFT: true, rarity: "Mythic" },
+  { chance: 0.001, tier: "Divine", reward: "Divine NFT + 1000 Coins", coins: 1000, isNFT: true, rarity: "Divine" },
 ]
+
+const NFT_NAMES = {
+  Common: [
+    "Pixel Warrior",
+    "Digital Coin",
+    "Crypto Gem",
+    "Base Token",
+    "Chain Link",
+    "Block Miner",
+    "Hash Fragment",
+    "Code Snippet",
+    "Data Byte",
+    "Network Node",
+  ],
+  Uncommon: [
+    "Neon Samurai",
+    "Cyber Wolf",
+    "Electric Tiger",
+    "Frost Bear",
+    "Wind Serpent",
+    "Digital Phoenix",
+    "Quantum Butterfly",
+    "Crystal Dragon",
+    "Shadow Panther",
+    "Fire Lion",
+  ],
+  Rare: [
+    "Stellar Guardian",
+    "Cosmic Wanderer",
+    "Mystic Owl",
+    "Golden Eagle",
+    "Silver Hawk",
+    "Plasma Sword",
+    "Energy Shield",
+    "Void Walker",
+    "Time Keeper",
+    "Space Ranger",
+  ],
+  Epic: [
+    "Galactic Emperor",
+    "Nebula Queen",
+    "Starforge Master",
+    "Void Sovereign",
+    "Cosmic Titan",
+    "Quantum Lord",
+    "Digital Overlord",
+    "Cyber Deity",
+    "Plasma God",
+    "Energy Supreme",
+  ],
+  Legendary: [
+    "Genesis Creator",
+    "Universe Architect",
+    "Reality Shaper",
+    "Dimension Walker",
+    "Infinity Guardian",
+    "Eternal Warden",
+    "Celestial Being",
+    "Divine Avatar",
+    "Cosmic Entity",
+    "Supreme Consciousness",
+  ],
+  Mythic: [
+    "The First Code",
+    "Origin Protocol",
+    "Prime Algorithm",
+    "Genesis Block",
+    "Alpha Sequence",
+    "Omega Cipher",
+    "Eternal Matrix",
+    "Infinite Loop",
+    "Perfect Hash",
+    "Ultimate Key",
+  ],
+  Divine: [
+    "The Creator's Vision",
+    "Source of All Chains",
+    "The Original Satoshi",
+    "Genesis of Genesis",
+    "The Prime Mover",
+    "Alpha and Omega",
+    "The Eternal Flame",
+    "The First Light",
+  ],
+}
 
 export default function NFTuklasApp() {
   const [coins, setCoins] = useState(0)
@@ -37,16 +141,30 @@ export default function NFTuklasApp() {
   const [totalProspects, setTotalProspects] = useState(0)
   const [streak, setStreak] = useState(0)
   const [livesTimer, setLivesTimer] = useState<number | null>(null)
+  const [prospectRunCoins, setProspectRunCoins] = useState(0)
+  const [isInProspectRun, setIsInProspectRun] = useState(false)
+  const [showBombExplosion, setShowBombExplosion] = useState(false)
+  const [showCashoutAnimation, setShowCashoutAnimation] = useState(false)
+  const [multiplier, setMultiplier] = useState(1)
+  const [bonusActive, setBonusActive] = useState(false)
+  const [nftCollection, setNftCollection] = useState<LootResult[]>([])
+  const [shopQuantities, setShopQuantities] = useState({
+    lives1: 1,
+    lives5: 1,
+    unlimited: 1,
+  })
 
   useEffect(() => {
     const savedCoins = localStorage.getItem("nftuklas-coins")
     const savedLives = localStorage.getItem("nftuklas-lives")
     const savedProspects = localStorage.getItem("nftuklas-prospects")
     const savedStreak = localStorage.getItem("nftuklas-streak")
+    const savedNFTs = localStorage.getItem("nftuklas-nfts")
     if (savedCoins) setCoins(Number.parseInt(savedCoins))
     if (savedLives) setLives(Number.parseInt(savedLives))
     if (savedProspects) setTotalProspects(Number.parseInt(savedProspects))
     if (savedStreak) setStreak(Number.parseInt(savedStreak))
+    if (savedNFTs) setNftCollection(JSON.parse(savedNFTs))
   }, [])
 
   useEffect(() => {
@@ -54,7 +172,8 @@ export default function NFTuklasApp() {
     localStorage.setItem("nftuklas-lives", lives.toString())
     localStorage.setItem("nftuklas-prospects", totalProspects.toString())
     localStorage.setItem("nftuklas-streak", streak.toString())
-  }, [coins, lives, totalProspects, streak])
+    localStorage.setItem("nftuklas-nfts", JSON.stringify(nftCollection))
+  }, [coins, lives, totalProspects, streak, nftCollection])
 
   useEffect(() => {
     if (lives < 5 && lives >= 0) {
@@ -87,13 +206,23 @@ export default function NFTuklasApp() {
     setTotalProspects(0)
     setStreak(0)
     setLastResult(null)
+    setProspectRunCoins(0)
+    setIsInProspectRun(false)
+    setMultiplier(1)
+    setBonusActive(false)
+    setNftCollection([])
     if (livesTimer) clearTimeout(livesTimer)
     setLivesTimer(null)
     localStorage.clear()
   }
 
-  const buyLives = (amount: number) => {
-    setLives((prev) => Math.min(5, prev + amount))
+  const buyLives = (amount: number, cost?: string) => {
+    // Added cost parameter for demo
+    if (amount === 999) {
+      setLives(999)
+    } else {
+      setLives((prev) => Math.min(5, prev + amount))
+    }
   }
 
   const rollLoot = (): LootResult => {
@@ -103,25 +232,54 @@ export default function NFTuklasApp() {
     for (const item of LOOT_TABLE) {
       cumulativeChance += item.chance
       if (random <= cumulativeChance) {
-        return {
+        const result = {
           tier: item.tier,
           reward: item.reward,
           coins: item.coins,
           isNFT: item.isNFT,
           isBomb: item.isBomb,
+          rarity: item.rarity,
         }
+
+        if (item.isNFT && item.rarity) {
+          const rarityNames = NFT_NAMES[item.rarity as keyof typeof NFT_NAMES] || NFT_NAMES.Common
+          result.nftName = rarityNames[Math.floor(Math.random() * rarityNames.length)]
+        }
+
+        return result
       }
     }
 
-    return { ...LOOT_TABLE[1], coins: Math.floor(Math.random() * 3) + 1 } as LootResult
+    return { ...LOOT_TABLE[1], coins: Math.floor(Math.random() * 5) + 1 } as LootResult
+  }
+
+  const cashout = async () => {
+    if (prospectRunCoins <= 0) return
+
+    setShowCashoutAnimation(true)
+
+    await new Promise((resolve) => setTimeout(resolve, 2000))
+
+    setCoins((prev) => prev + prospectRunCoins)
+    setProspectRunCoins(0)
+    setIsInProspectRun(false)
+    setShowCashoutAnimation(false)
+    setShowCoinAnimation(true)
+    setTimeout(() => setShowCoinAnimation(false), 600)
   }
 
   const prospect = async () => {
-    if (lives <= 0 || isProspecting) return
+    if (isProspecting) return
 
     setIsProspecting(true)
-    setLives((prev) => prev - 1)
     setTotalProspects((prev) => prev + 1)
+    if (!isInProspectRun) {
+      setIsInProspectRun(true)
+      setProspectRunCoins(0)
+    }
+
+    const streakBonus = Math.floor(streak / 5) * 0.1
+    setMultiplier(1 + streakBonus)
 
     await new Promise((resolve) => setTimeout(resolve, 3000))
 
@@ -129,20 +287,32 @@ export default function NFTuklasApp() {
     setLastResult(result)
 
     if (result.isBomb) {
-      setLives((prev) => Math.max(0, prev - 1))
+      setShowBombExplosion(true)
+      setTimeout(() => setShowBombExplosion(false), 2000)
+      setProspectRunCoins(0)
+      setIsInProspectRun(false)
       setStreak(0)
+      setMultiplier(1)
+      setLives((prev) => Math.max(0, prev - 1))
     } else if (result.coins > 0) {
-      setCoins((prev) => prev + result.coins)
-      setShowCoinAnimation(true)
+      const bonusCoins = Math.floor(result.coins * multiplier)
+      setProspectRunCoins((prev) => prev + bonusCoins)
       setStreak((prev) => prev + 1)
-      setTimeout(() => setShowCoinAnimation(false), 600)
     } else if (result.tier === "Dud") {
       setStreak(0)
+      setMultiplier(1)
     } else {
       setStreak((prev) => prev + 1)
     }
 
-    if (result.tier === "Epic" || result.tier === "Legendary" || result.tier === "Mythic") {
+    if (result.isNFT) {
+      setNftCollection((prev) => [...prev, result])
+      setShowConfetti(true)
+      setTimeout(() => setShowConfetti(false), 4000)
+      if (result.coins > 0) {
+        setCoins((prev) => prev + result.coins)
+      }
+    } else if (result.tier === "Epic") {
       setShowConfetti(true)
       setTimeout(() => setShowConfetti(false), 4000)
     }
@@ -164,6 +334,8 @@ export default function NFTuklasApp() {
         return "bg-chart-5 text-foreground"
       case "Mythic":
         return "bg-gradient-to-r from-chart-5 to-chart-1 text-foreground"
+      case "Divine":
+        return "bg-gradient-to-r from-yellow-400 via-purple-500 to-pink-500 text-white animate-pulse"
       case "Bomb":
         return "bg-destructive text-destructive-foreground"
       default:
@@ -173,13 +345,17 @@ export default function NFTuklasApp() {
 
   const getTierIcon = (tier: string) => {
     switch (tier) {
+      case "Divine":
+        return <Crown className="w-4 h-4" />
       case "Mythic":
         return <Star className="w-4 h-4" />
       case "Legendary":
         return <Trophy className="w-4 h-4" />
       case "Epic":
-        return <Sparkles className="w-4 h-4" />
+        return <Diamond className="w-4 h-4" />
       case "Rare":
+        return <Gem className="w-4 h-4" />
+      case "Uncommon":
         return <Zap className="w-4 h-4" />
       case "Bomb":
         return <Bomb className="w-4 h-4" />
@@ -192,6 +368,73 @@ export default function NFTuklasApp() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-background via-muted to-secondary/20 p-4">
+      {/* ... existing animations ... */}
+
+      <AnimatePresence>
+        {showBombExplosion && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0 }}
+            className="fixed inset-0 pointer-events-none z-50 flex items-center justify-center"
+          >
+            <motion.div
+              animate={{
+                scale: [1, 2, 1],
+                rotate: [0, 180, 360],
+              }}
+              transition={{ duration: 2, ease: "easeOut" }}
+              className="text-8xl"
+            >
+              💥
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="absolute inset-0 bg-destructive/20 backdrop-blur-sm"
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* ... existing cashout animation ... */}
+
+      {/* ... existing confetti animation ... */}
+
+      <AnimatePresence>
+        {showCashoutAnimation && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 pointer-events-none z-40 flex items-center justify-center"
+          >
+            <motion.div
+              animate={{
+                rotate: [0, 360],
+                scale: [1, 1.2, 1],
+              }}
+              transition={{
+                rotate: { repeat: Number.POSITIVE_INFINITY, duration: 1 },
+                scale: { duration: 2, ease: "easeInOut" },
+              }}
+              className="text-6xl"
+            >
+              <Sieve className="w-16 h-16 text-primary" />
+            </motion.div>
+            <motion.div
+              initial={{ y: -50, opacity: 0 }}
+              animate={{ y: 50, opacity: [0, 1, 0] }}
+              transition={{ repeat: Number.POSITIVE_INFINITY, duration: 0.5 }}
+              className="absolute text-2xl"
+            >
+              🪙
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <AnimatePresence>
         {showConfetti && (
           <motion.div
@@ -241,7 +484,8 @@ export default function NFTuklasApp() {
           {totalProspects > 0 && (
             <div className="flex items-center justify-center space-x-4">
               <p className="text-sm text-muted-foreground">
-                Total Prospects: {totalProspects} | Current Streak: {streak}
+                Total Prospects: {totalProspects} | Streak: {streak}
+                {multiplier > 1 && <span className="text-chart-2 font-bold"> | {multiplier.toFixed(1)}x Bonus!</span>}
               </p>
               <Button
                 onClick={resetDemo}
@@ -251,6 +495,12 @@ export default function NFTuklasApp() {
               >
                 <RotateCcw className="w-4 h-4" />
               </Button>
+            </div>
+          )}
+          {nftCollection.length > 0 && (
+            <div className="flex items-center justify-center space-x-2">
+              <Trophy className="w-4 h-4 text-chart-5" />
+              <span className="text-sm text-chart-5 font-medium">NFTs Collected: {nftCollection.length}</span>
             </div>
           )}
         </motion.div>
@@ -294,9 +544,18 @@ export default function NFTuklasApp() {
                       >
                         <Coins className="w-5 h-5 text-primary" />
                       </motion.div>
-                      <span className="text-card-foreground font-semibold">Coins</span>
+                      <span className="text-card-foreground font-semibold">Banked</span>
                     </div>
                     <p className="text-2xl font-bold text-primary">{coins.toLocaleString()}</p>
+                    {isInProspectRun && (
+                      <div className="mt-2 p-2 bg-muted/50 rounded">
+                        <p className="text-xs text-muted-foreground">Prospect Run</p>
+                        <p className="text-lg font-semibold text-chart-2">+{prospectRunCoins}</p>
+                        {multiplier > 1 && (
+                          <p className="text-xs text-chart-2">{multiplier.toFixed(1)}x streak bonus</p>
+                        )}
+                      </div>
+                    )}
                   </CardContent>
                 </Card>
               </motion.div>
@@ -327,6 +586,40 @@ export default function NFTuklasApp() {
               </motion.div>
             </div>
 
+            {/* ... existing cashout section ... */}
+
+            {isInProspectRun && prospectRunCoins > 0 && (
+              <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.5 }}>
+                <Card className="bg-gradient-to-r from-chart-2/20 to-primary/20 backdrop-blur border-chart-2/50 shadow-lg">
+                  <CardContent className="p-4 text-center">
+                    <Button
+                      onClick={cashout}
+                      disabled={showCashoutAnimation}
+                      className="w-full bg-gradient-to-r from-chart-2 to-primary hover:from-chart-2/90 hover:to-primary/90 disabled:opacity-50 shadow-lg"
+                    >
+                      {showCashoutAnimation ? (
+                        <div className="flex items-center space-x-2">
+                          <motion.div
+                            animate={{ rotate: 360 }}
+                            transition={{ repeat: Number.POSITIVE_INFINITY, duration: 1 }}
+                          >
+                            <Sieve className="w-5 h-5" />
+                          </motion.div>
+                          <span>Sieving...</span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center space-x-2">
+                          <Sieve className="w-5 h-5" />
+                          <span>Cashout {prospectRunCoins} Coins</span>
+                        </div>
+                      )}
+                    </Button>
+                    <p className="text-xs text-muted-foreground mt-2">⚠️ Bombs will destroy all prospect run coins!</p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            )}
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -336,12 +629,12 @@ export default function NFTuklasApp() {
                 <CardContent className="p-6 text-center space-y-4">
                   <motion.div
                     className={isProspecting ? "prospect-pulse" : ""}
-                    whileHover={{ scale: lives > 0 ? 1.02 : 1 }}
-                    whileTap={{ scale: lives > 0 ? 0.98 : 1 }}
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                   >
                     <Button
                       onClick={prospect}
-                      disabled={lives <= 0 || isProspecting}
+                      disabled={isProspecting}
                       size="lg"
                       className="w-full h-16 text-lg font-bold bg-gradient-to-r from-primary to-chart-2 hover:from-primary/90 hover:to-chart-2/90 disabled:opacity-50 shadow-lg"
                     >
@@ -357,20 +650,13 @@ export default function NFTuklasApp() {
                       ) : (
                         <div className="flex items-center space-x-2">
                           <Gift className="w-6 h-6" />
-                          <span>Prospect!</span>
+                          <span>Prospect! (Free)</span>
                         </div>
                       )}
                     </Button>
                   </motion.div>
 
-                  {lives <= 0 && (
-                    <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="space-y-2">
-                      <p className="text-destructive text-sm font-medium">No lives remaining!</p>
-                      <Button onClick={() => buyLives(1)} variant="outline" size="sm" className="text-xs">
-                        Get 1 Life (Demo)
-                      </Button>
-                    </motion.div>
-                  )}
+                  <p className="text-xs text-muted-foreground">💡 Prospecting is free! Only bombs cost lives.</p>
                 </CardContent>
               </Card>
             </motion.div>
@@ -410,15 +696,23 @@ export default function NFTuklasApp() {
                         className="text-card-foreground font-semibold text-lg"
                       >
                         {lastResult.reward}
+                        {lastResult.nftName && (
+                          <span className="block text-chart-5 font-bold mt-1">"{lastResult.nftName}"</span>
+                        )}
                       </motion.p>
-                      {lastResult.coins > 0 && (
+                      {lastResult.coins > 0 && !lastResult.isBomb && (
                         <motion.p
                           initial={{ opacity: 0, scale: 0 }}
                           animate={{ opacity: 1, scale: 1 }}
                           transition={{ delay: 0.6, type: "spring" }}
                           className="text-primary font-bold text-xl"
                         >
-                          +{lastResult.coins} coins
+                          +{lastResult.coins} coins {lastResult.isNFT ? "(banked)" : "(to prospect run)"}
+                          {multiplier > 1 && !lastResult.isNFT && (
+                            <span className="block text-chart-2 text-sm">
+                              ({Math.floor(lastResult.coins / multiplier)} base × {multiplier.toFixed(1)})
+                            </span>
+                          )}
                         </motion.p>
                       )}
                       {lastResult.isBomb && (
@@ -428,7 +722,7 @@ export default function NFTuklasApp() {
                           transition={{ delay: 0.6 }}
                           className="text-destructive font-medium"
                         >
-                          Lost 1 life!
+                          💥 All prospect run coins destroyed! Lost 1 life!
                         </motion.p>
                       )}
                       {lastResult.isNFT && (
@@ -447,6 +741,8 @@ export default function NFTuklasApp() {
               )}
             </AnimatePresence>
 
+            {/* ... existing shop section ... */}
+
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -463,15 +759,85 @@ export default function NFTuklasApp() {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-3">
-                  <Button onClick={() => buyLives(5)} className="w-full" variant="outline" disabled={lives >= 5}>
-                    Buy 5 Lives - 0.001 ETH {lives >= 5 && "(Full)"}
-                  </Button>
-                  <Button onClick={() => setLives(999)} className="w-full" variant="outline">
-                    Buy Unlimited Lives - 0.01 ETH (Demo)
-                  </Button>
-                  <Button disabled className="w-full bg-transparent" variant="outline">
-                    Lucky Charm (+10% Rare) - 0.005 ETH
-                  </Button>
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex-1">
+                        <p className="font-medium">1 Life</p>
+                        <p className="text-sm text-muted-foreground">0.0005 ETH</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            setShopQuantities((prev) => ({ ...prev, lives1: Math.max(1, prev.lives1 - 1) }))
+                          }
+                        >
+                          -
+                        </Button>
+                        <span className="w-8 text-center">{shopQuantities.lives1}</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            setShopQuantities((prev) => ({ ...prev, lives1: Math.min(10, prev.lives1 + 1) }))
+                          }
+                        >
+                          +
+                        </Button>
+                        <Button onClick={() => buyLives(shopQuantities.lives1)} size="sm">
+                          Buy
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 border rounded-lg">
+                      <div className="flex-1">
+                        <p className="font-medium">5 Lives (Full)</p>
+                        <p className="text-sm text-muted-foreground">0.002 ETH</p>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            setShopQuantities((prev) => ({ ...prev, lives5: Math.max(1, prev.lives5 - 1) }))
+                          }
+                        >
+                          -
+                        </Button>
+                        <span className="w-8 text-center">{shopQuantities.lives5}</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() =>
+                            setShopQuantities((prev) => ({ ...prev, lives5: Math.min(5, prev.lives5 + 1) }))
+                          }
+                        >
+                          +
+                        </Button>
+                        <Button onClick={() => buyLives(5 * shopQuantities.lives5)} size="sm">
+                          Buy
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center justify-between p-3 border rounded-lg bg-gradient-to-r from-primary/10 to-chart-2/10">
+                      <div className="flex-1">
+                        <p className="font-medium text-primary">Unlimited Lives (Demo)</p>
+                        <p className="text-sm text-muted-foreground">0.01 ETH</p>
+                      </div>
+                      <Button onClick={() => buyLives(999)} className="bg-gradient-to-r from-primary to-chart-2">
+                        Buy Now
+                      </Button>
+                    </div>
+                  </div>
+
+                  <div className="pt-2 border-t">
+                    <Button disabled className="w-full bg-transparent" variant="outline">
+                      Lucky Charm (+10% Rare) - 0.005 ETH
+                    </Button>
+                  </div>
                 </CardContent>
               </Card>
             </motion.div>
